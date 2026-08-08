@@ -8,7 +8,7 @@ from io import BytesIO
 from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile
 
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request, send_file, send_from_directory
 from flask_cors import CORS
 from openpyxl import Workbook
 
@@ -48,6 +48,7 @@ SEKOU_SECTION_TITLES = [
 
 ORDERER_SPECS_DIR = Config.DATA_DIR / "orderer_specs"
 ORDERER_SPECS_INDEX = ORDERER_SPECS_DIR / "index.json"
+WEB_ROOT = Path(__file__).resolve().parent.parent
 
 
 def _safe_segment(text: str) -> str:
@@ -98,6 +99,26 @@ def _mock_extract() -> dict:
         ],
         "created_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
     }
+
+
+@app.get("/")
+def ui_index():
+    return send_file(WEB_ROOT / "index.html")
+
+
+@app.get("/css/<path:filename>")
+def ui_css(filename: str):
+    return send_from_directory(WEB_ROOT / "css", filename)
+
+
+@app.get("/js/<path:filename>")
+def ui_js(filename: str):
+    return send_from_directory(WEB_ROOT / "js", filename)
+
+
+@app.get("/assets/<path:filename>")
+def ui_assets(filename: str):
+    return send_from_directory(WEB_ROOT / "assets", filename)
 
 
 @app.get("/api/health")

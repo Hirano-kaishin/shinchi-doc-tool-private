@@ -107,10 +107,12 @@ const defaultScheduleTasks = [
     ["蓄電池基礎・設置", "区画", "9", [["plan", 4, 2]], 0],
 ];
 
-const API_BASE = (window.SD_API_BASE || "http://127.0.0.1:5000").replace(
-    /\/$/,
-    "",
-);
+const API_BASE = (
+    window.SD_API_BASE ||
+    (window.location.protocol === "file:"
+        ? "http://127.0.0.1:5000"
+        : window.location.origin)
+).replace(/\/$/, "");
 const CLIENT_STATE_KEY = "shinchiDocToolStateV2";
 
 /* ---------- state ---------- */

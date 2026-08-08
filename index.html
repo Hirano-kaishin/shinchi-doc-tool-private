@@ -1,0 +1,1555 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>新地建設工業｜現場書類オートメーション</title>
+        <link rel="stylesheet" href="css/style.css" />
+    </head>
+    <body>
+        <div class="app">
+            <!-- Sidebar -->
+            <aside class="side">
+                <div class="brand">
+                    <a
+                        class="brand-link"
+                        href="https://shinchi-kk.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <div class="logo">
+                            <img
+                                src="https://shinchi-kk.com/wp-content/uploads/2024/10/%E3%82%A2%E3%82%BB%E3%83%83%E3%83%88-2@4x-8-1.png?1786135287"
+                                alt="株式会社新地建設工業 ロゴ"
+                            />
+                        </div>
+                        <div class="btxt">
+                            <b>新地建設工業</b><span>SITE DOC AUTOMATION</span>
+                        </div>
+                    </a>
+                </div>
+                <nav class="nav">
+                    <a class="on" data-view="dash"
+                        ><span class="ic">▤</span>トップ</a
+                    >
+                    <a data-view="upload"
+                        ><span class="ic">⬆</span>図面アップロード<span
+                            class="badge"
+                            >AI</span
+                        ></a
+                    >
+
+                    <div class="grp">書類作成</div>
+                    <a data-view="sekou"><span class="ic">▣</span>施工計画書</a>
+                    <a data-view="koutei"
+                        ><span class="ic">▤</span>工程管理表</a
+                    >
+                    <a data-view="hinshitsu"
+                        ><span class="ic">◈</span>品質管理計画書</a
+                    >
+                    <a data-view="anzen"
+                        ><span class="ic">⛑</span>安全衛生管理計画書</a
+                    >
+                    <a data-view="saigai"
+                        ><span class="ic">⚠</span>災害防止協議会資料</a
+                    >
+
+                    <div class="grp">マスタ管理</div>
+                    <a data-view="company"
+                        ><span class="ic">🏢</span>企業情報登録</a
+                    >
+                    <a data-view="staff"
+                        ><span class="ic">◔</span>社員名簿登録（資格含む）</a
+                    >
+                    <a data-view="orderer"
+                        ><span class="ic">🏛</span>発注者情報登録</a
+                    >
+                </nav>
+            </aside>
+
+            <!-- Main -->
+            <div class="main">
+                <div class="topbar">
+                    <div class="crumb" id="crumb"><b>ダッシュボード</b></div>
+                    <div class="proj">
+                        <span class="dot"></span>DS千葉袖ヶ浦下泉
+                        太陽光発電所建設工事
+                    </div>
+                    <div class="sp"></div>
+                    <button class="iconbtn" title="通知">🔔</button>
+                    <button
+                        class="btn ghost sm"
+                        onclick="flash('下書きを保存しました')"
+                    >
+                        💾 保存
+                    </button>
+                    <button class="btn accent sm" onclick="exportAllZip()">
+                        ⬇ 一括書き出し（ZIP）
+                    </button>
+                </div>
+
+                <div class="content">
+                    <!-- ===== DASHBOARD ===== -->
+                    <section class="view on" id="v-dash">
+                        <div class="pagehead">
+                            <div>
+                                <h1 class="page">工事書類作成トップ</h1>
+                                <div class="sub">
+                                    新規工事登録と、作成中工事の管理のみ表示します
+                                </div>
+                            </div>
+                            <button class="btn primary" data-goto="upload">
+                                ＋ 新規工事（アップロードから作成）
+                            </button>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-h">
+                                <h3>工事一覧（現在作成中の工事）</h3>
+                                <div class="sp"></div>
+                                <select
+                                    id="dashProjectSelect"
+                                    style="
+                                        min-width: 320px;
+                                        border: 1px solid var(--line);
+                                        border-radius: 8px;
+                                        padding: 7px 10px;
+                                        font-size: 12.5px;
+                                    "
+                                ></select>
+                            </div>
+                            <div class="panel-b" style="padding: 0">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>工事名</th>
+                                            <th>種別</th>
+                                            <th>発注者</th>
+                                            <th>施工場所</th>
+                                            <th>工期</th>
+                                            <th>状態</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="topProjectTableBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="panel" id="topProjectDocArea">
+                            <div class="panel-h">
+                                <h3>選択工事の作成書類</h3>
+                                <div class="sp"></div>
+                                <span
+                                    class="mini"
+                                    id="topProjectSummary"
+                                ></span>
+                            </div>
+                            <div class="panel-b">
+                                <div class="grid2" style="margin-bottom: 14px">
+                                    <div class="field" style="margin: 0">
+                                        <label>この工事の発注者条件</label>
+                                        <select
+                                            id="projectOrdererSelect"
+                                        ></select>
+                                    </div>
+                                    <div
+                                        class="field"
+                                        style="margin: 0; align-self: end"
+                                    >
+                                        <button
+                                            class="btn primary"
+                                            type="button"
+                                            onclick="
+                                                applyProjectOrdererFromTop()
+                                            "
+                                        >
+                                            発注者条件をこの工事に適用
+                                        </button>
+                                    </div>
+                                </div>
+                                <div
+                                    id="dashEmptyState"
+                                    class="dash-empty-state"
+                                >
+                                    <h4>工事を選択してください</h4>
+                                    <p>
+                                        選択すると、作成中の書類項目（施工計画書・工程管理表など）が表示されます。
+                                    </p>
+                                </div>
+                                <div id="dashDetailArea" style="display: none">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>書類</th>
+                                                <th style="width: 170px">
+                                                    進捗
+                                                </th>
+                                                <th>状態</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dashDocStatusBody"></tbody>
+                                    </table>
+                                    <div
+                                        class="notice"
+                                        style="
+                                            margin-top: 14px;
+                                            margin-bottom: 0;
+                                        "
+                                    >
+                                        <span class="i">📌</span>
+                                        <div>
+                                            ここで開いた書類で、発注者条件・企業情報・社員名簿情報を反映した施工計画書/工程管理表を作成します。
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            <div class="panel-h"><h3>マスタ管理</h3></div>
+                            <div class="panel-b">
+                                <div
+                                    class="doctypes"
+                                    style="
+                                        grid-template-columns: repeat(3, 1fr);
+                                    "
+                                >
+                                    <div class="doctype" data-goto="company">
+                                        <div
+                                            class="dh"
+                                            style="
+                                                background: #eaf2f9;
+                                                color: var(--blue);
+                                            "
+                                        >
+                                            🏢
+                                        </div>
+                                        <h3>企業情報登録</h3>
+                                        <p>自社情報・押印者・標準文面を登録</p>
+                                    </div>
+                                    <div class="doctype" data-goto="staff">
+                                        <div
+                                            class="dh"
+                                            style="
+                                                background: #eaf5ee;
+                                                color: var(--ok);
+                                            "
+                                        >
+                                            👷
+                                        </div>
+                                        <h3>社員名簿登録（資格含む）</h3>
+                                        <p>
+                                            担当者と保有資格を登録し書類へ反映
+                                        </p>
+                                    </div>
+                                    <div class="doctype" data-goto="orderer">
+                                        <div
+                                            class="dh"
+                                            style="
+                                                background: #fdf3e7;
+                                                color: var(--accent-d);
+                                            "
+                                        >
+                                            🏛
+                                        </div>
+                                        <h3>発注者情報登録</h3>
+                                        <p>
+                                            民間・公共の条件/仕様書/管理基準を登録
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ===== PROJECTS ===== -->
+                    <section class="view" id="v-projects">
+                        <div class="pagehead">
+                            <div>
+                                <h1 class="page">案件一覧</h1>
+                                <div class="sub">
+                                    図面をアップロードして案件を作成します
+                                </div>
+                            </div>
+                            <button class="btn primary" data-goto="upload">
+                                ＋ 新規案件
+                            </button>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-b" style="padding: 0">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>案件名</th>
+                                            <th>施工場所</th>
+                                            <th>工期</th>
+                                            <th>図面</th>
+                                            <th>書類進捗</th>
+                                            <th>状態</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <b
+                                                    >DS千葉袖ヶ浦下泉
+                                                    太陽光発電所建設工事</b
+                                                >
+                                                <div class="mini">DS-2603</div>
+                                            </td>
+                                            <td>千葉県袖ケ浦市下泉</td>
+                                            <td>2026/04〜2026/09</td>
+                                            <td>
+                                                <span class="tag b">17枚</span>
+                                            </td>
+                                            <td>
+                                                <div class="progress">
+                                                    <i style="width: 64%"></i>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="tag y"
+                                                    >作成中</span
+                                                >
+                                            </td>
+                                            <td>
+                                                <button
+                                                    class="btn ghost sm"
+                                                    data-goto="sekou"
+                                                >
+                                                    開く
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <b
+                                                    >小林松ケ尾
+                                                    太陽光発電所建設工事</b
+                                                >
+                                                <div class="mini">KB-2409</div>
+                                            </td>
+                                            <td>宮崎県小林市松ケ尾</td>
+                                            <td>2024/09〜2025/03</td>
+                                            <td>
+                                                <span class="tag b">21枚</span>
+                                            </td>
+                                            <td>
+                                                <div class="progress">
+                                                    <i style="width: 100%"></i>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="tag g">完了</span>
+                                            </td>
+                                            <td>
+                                                <button
+                                                    class="btn ghost sm"
+                                                    onclick="
+                                                        flash('過去案件を表示')
+                                                    "
+                                                >
+                                                    開く
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <b>都城太陽光 第2期 造成工事</b>
+                                                <div class="mini">MY-2512</div>
+                                            </td>
+                                            <td>宮崎県都城市</td>
+                                            <td>2025/12〜2026/06</td>
+                                            <td>
+                                                <span class="tag b">9枚</span>
+                                            </td>
+                                            <td>
+                                                <div class="progress">
+                                                    <i style="width: 100%"></i>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="tag g">完了</span>
+                                            </td>
+                                            <td>
+                                                <button
+                                                    class="btn ghost sm"
+                                                    onclick="
+                                                        flash('過去案件を表示')
+                                                    "
+                                                >
+                                                    開く
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ===== UPLOAD ===== -->
+                    <section class="view" id="v-upload">
+                        <div class="pagehead">
+                            <div>
+                                <h1 class="page">図面アップロード ＆ AI読込</h1>
+                                <div class="sub">
+                                    図面・仕様書を読み込み、各書類のたたき台を自動生成します
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stepper">
+                            <div class="step done">
+                                <span class="no">✓</span>アップロード
+                            </div>
+                            <div class="line done"></div>
+                            <div class="step done">
+                                <span class="no">✓</span>AI解析
+                            </div>
+                            <div class="line done"></div>
+                            <div class="step on">
+                                <span class="no">3</span>抽出内容の確認
+                            </div>
+                            <div class="line"></div>
+                            <div class="step">
+                                <span class="no">4</span>書類生成
+                            </div>
+                        </div>
+                        <div class="split">
+                            <div>
+                                <div class="panel">
+                                    <div class="panel-b">
+                                        <div
+                                            class="drop"
+                                            onclick="
+                                                flash('ファイル選択（デモ）')
+                                            "
+                                        >
+                                            <div class="big">📤</div>
+                                            <h3>
+                                                図面PDF・仕様書をドラッグ＆ドロップ
+                                            </h3>
+                                            <p>
+                                                PDF / 画像 / Excel
+                                                に対応　｜　複数ファイルまとめて可
+                                            </p>
+                                            <button
+                                                class="btn primary"
+                                                style="margin-top: 14px"
+                                            >
+                                                ファイルを選択
+                                            </button>
+                                        </div>
+                                        <div class="filelist">
+                                            <div class="filerow" id="uploadFileListEmpty">
+                                                <div class="fi">-</div>
+                                                <div class="fn">
+                                                    <b>アップロード履歴はありません</b
+                                                    ><span
+                                                        >新規工事モードでは過去案件のファイルは表示しません</span
+                                                    >
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="panel">
+                                    <div class="panel-h">
+                                        <h3>AI抽出結果</h3>
+                                        <span class="src-badge"
+                                            >図面から自動</span
+                                        >
+                                    </div>
+                                    <div class="panel-b">
+                                        <div class="field">
+                                            <label>工事名</label
+                                            ><input
+                                                id="uploadProjectName"
+                                                type="text"
+                                                value=""
+                                                placeholder="例）○○新設工事"
+                                            />
+                                        </div>
+                                        <div class="field">
+                                            <label>施工場所</label
+                                            ><input
+                                                id="uploadProjectPlace"
+                                                type="text"
+                                                value=""
+                                                placeholder="例）宮崎県都城市○○"
+                                            />
+                                        </div>
+                                        <div class="grid2">
+                                            <div class="field">
+                                                <label>着工予定</label
+                                                ><input
+                                                    id="uploadProjectStart"
+                                                    type="text"
+                                                    value=""
+                                                    placeholder="例）令和9年4月1日"
+                                                />
+                                            </div>
+                                            <div class="field">
+                                                <label>完成予定</label
+                                                ><input
+                                                    id="uploadProjectEnd"
+                                                    type="text"
+                                                    value=""
+                                                    placeholder="例）令和9年9月30日"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div class="field">
+                                            <label
+                                                >発注者条件（民間 /
+                                                公共）</label
+                                            >
+                                            <select
+                                                id="uploadOrdererSelect"
+                                            ></select>
+                                            <div class="hint">
+                                                登録済みの発注者条件を選択して、書類作成に反映します。
+                                            </div>
+                                        </div>
+                                        <div class="field">
+                                            <label>主要工種</label
+                                            ><input
+                                                id="uploadMajorWorks"
+                                                type="text"
+                                                value=""
+                                                placeholder="例）土工 / 排水路工 / 架台据付"
+                                            />
+                                        </div>
+                                        <div class="notice" style="margin: 0">
+                                            <span class="i">💡</span>
+                                            <div>
+                                                抽出内容はここで手直しできます。確定すると各書類へ反映されます。
+                                            </div>
+                                        </div>
+                                        <button
+                                            class="btn accent"
+                                            style="
+                                                width: 100%;
+                                                justify-content: center;
+                                                margin-top: 16px;
+                                            "
+                                            onclick="genDocs()"
+                                        >
+                                            書類作成を開始（5書類生成） →
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ===== 施工計画書 ===== -->
+                    <section class="view" id="v-sekou">
+                        <div class="pagehead">
+                            <div>
+                                <h1 class="page">施工計画書</h1>
+                                <div class="sub">
+                                    図面から生成した内容を項目ごとに確認・修正できます（全16項目）
+                                </div>
+                                <div class="flow-mini" id="sekouProgressBadge">
+                                    完了 0 / 16 項目
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 9px">
+                                <button
+                                    class="btn ghost"
+                                    onclick="flash('再生成しました')"
+                                >
+                                    ↻ AIで再生成</button
+                                ><button
+                                    class="btn accent"
+                                    onclick="exportAllZip()"
+                                >
+                                    ⬇ 一括書き出し（ZIP）
+                                </button>
+                            </div>
+                        </div>
+                        <div class="notice">
+                            <span class="i">🧭</span>
+                            <div>
+                                各項目で「〜を作成」→プレビュー確認→下の入力欄で手修正→「この内容で決定」の順で進めます。決定済み項目には
+                                ✓ が付きます。
+                            </div>
+                        </div>
+                        <div class="editor">
+                            <div class="sec-nav" id="secNav"></div>
+                            <div class="sec-body" id="secBody"></div>
+                        </div>
+                    </section>
+
+                    <!-- ===== 工程管理表 ===== -->
+                    <section class="view" id="v-koutei">
+                        <div class="pagehead">
+                            <div>
+                                <h1 class="page">工程管理表</h1>
+                                <div class="sub">
+                                    新地建設の進捗基準に基づき、図面の数量から工程を自動割付
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 9px">
+                                <button class="btn ghost" data-goto="orderer">
+                                    ⚙ 発注者条件を確認</button
+                                ><button
+                                    class="btn accent"
+                                    onclick="exportAllZip()"
+                                >
+                                    ⬇ 一括書き出し（ZIP）
+                                </button>
+                            </div>
+                        </div>
+                        <div class="notice">
+                            <span class="i">📐</span>
+                            <div>
+                                <b>進捗基準（新地建設 設定）</b>：予定と実施が
+                                ±10%
+                                を超えた工種は変更工程表を自動作成／段階確認・安全訓練日を自動配置。基準は「進捗基準設定」で変更できます。
+                            </div>
+                        </div>
+                        <div class="flow-inline-panel">
+                            <div class="flow-inline-head">
+                                工程管理表の作成フロー
+                            </div>
+                            <div class="flow-inline-actions">
+                                <button
+                                    class="btn ghost sm"
+                                    onclick="syncKouteiFromSekou()"
+                                >
+                                    施工計画書の計画工程表を反映
+                                </button>
+                                <button
+                                    class="btn primary sm"
+                                    onclick="confirmKouteiFlow()"
+                                >
+                                    この内容で決定
+                                </button>
+                                <span class="flow-state" id="kouteiFlowStatus"
+                                    >未作成</span
+                                >
+                            </div>
+                        </div>
+                        <div class="gantt">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="name">工種 / 種別</th>
+                                        <th>単位</th>
+                                        <th>数量</th>
+                                        <th>4月</th>
+                                        <th>5月</th>
+                                        <th>6月</th>
+                                        <th>7月</th>
+                                        <th>8月</th>
+                                        <th>9月</th>
+                                        <th>進捗</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ganttBody"></tbody>
+                            </table>
+                        </div>
+                        <div
+                            style="
+                                display: flex;
+                                gap: 16px;
+                                margin-top: 14px;
+                                font-size: 11.5px;
+                                color: var(--muted);
+                            "
+                        >
+                            <span
+                                ><i
+                                    style="
+                                        display: inline-block;
+                                        width: 22px;
+                                        height: 10px;
+                                        background: linear-gradient(
+                                            90deg,
+                                            var(--ok),
+                                            #248a4d
+                                        );
+                                        border-radius: 3px;
+                                        vertical-align: middle;
+                                    "
+                                ></i>
+                                実施(完了)</span
+                            >
+                            <span
+                                ><i
+                                    style="
+                                        display: inline-block;
+                                        width: 22px;
+                                        height: 10px;
+                                        background: linear-gradient(
+                                            90deg,
+                                            var(--blue-l),
+                                            var(--blue)
+                                        );
+                                        border-radius: 3px;
+                                        vertical-align: middle;
+                                    "
+                                ></i>
+                                実施(進行中)</span
+                            >
+                            <span
+                                ><i
+                                    style="
+                                        display: inline-block;
+                                        width: 22px;
+                                        height: 10px;
+                                        background: repeating-linear-gradient(
+                                            45deg,
+                                            #cdd9e3,
+                                            #cdd9e3 4px,
+                                            #e3ebf2 4px,
+                                            #e3ebf2 8px
+                                        );
+                                        border-radius: 3px;
+                                        vertical-align: middle;
+                                    "
+                                ></i>
+                                予定</span
+                            >
+                        </div>
+                    </section>
+
+                    <!-- ===== 品質管理計画書 ===== -->
+                    <section class="view" id="v-hinshitsu">
+                        <div class="pagehead">
+                            <div>
+                                <h1 class="page">品質管理計画書</h1>
+                                <div class="sub">
+                                    登録済みのひな形をベースに、図面の工種へ自動で紐付け
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 9px">
+                                <button
+                                    class="btn ghost"
+                                    onclick="flash('ひな形を切替')"
+                                >
+                                    ▤ ひな形選択</button
+                                ><button
+                                    class="btn accent"
+                                    onclick="
+                                        flash(
+                                            '品質管理計画書.pdf を書き出しました',
+                                        )
+                                    "
+                                >
+                                    ⬇ 書き出し
+                                </button>
+                            </div>
+                        </div>
+                        <div class="notice">
+                            <span class="i">◈</span>
+                            <div>
+                                この書類は<b>ひな形あり</b>。図面から検出した工種（土工・排水路工・杭・基礎コンクリート）に合わせて試験項目を自動セットしています。数値・頻度は編集できます。
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-b" style="padding: 0">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>工種</th>
+                                            <th>管理項目</th>
+                                            <th>試験・検査方法</th>
+                                            <th>規格値 / 管理基準</th>
+                                            <th>頻度</th>
+                                            <th>元</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td rowspan="2"><b>土工</b></td>
+                                            <td>締固め度</td>
+                                            <td>RI計器 / 砂置換法</td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    value="90%以上"
+                                                    style="
+                                                        width: 90px;
+                                                        border: 1px solid
+                                                            var(--line);
+                                                        border-radius: 6px;
+                                                        padding: 4px 7px;
+                                                    "
+                                                />
+                                            </td>
+                                            <td>1,000m²に1回</td>
+                                            <td>
+                                                <span class="src-badge"
+                                                    >図面</span
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>盛土 1層厚</td>
+                                            <td>スケール測定</td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    value="30cm以下"
+                                                    style="
+                                                        width: 90px;
+                                                        border: 1px solid
+                                                            var(--line);
+                                                        border-radius: 6px;
+                                                        padding: 4px 7px;
+                                                    "
+                                                />
+                                            </td>
+                                            <td>各層</td>
+                                            <td>
+                                                <span class="src-badge man"
+                                                    >ひな形</span
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>排水路工</b></td>
+                                            <td>基礎砕石厚</td>
+                                            <td>スケール測定</td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    value="規定厚±規定内"
+                                                    style="
+                                                        width: 120px;
+                                                        border: 1px solid
+                                                            var(--line);
+                                                        border-radius: 6px;
+                                                        padding: 4px 7px;
+                                                    "
+                                                />
+                                            </td>
+                                            <td>20mに1回</td>
+                                            <td>
+                                                <span class="src-badge"
+                                                    >図面</span
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>基礎コンクリート</b></td>
+                                            <td>圧縮強度</td>
+                                            <td>供試体圧縮試験</td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    value="設計基準強度以上"
+                                                    style="
+                                                        width: 150px;
+                                                        border: 1px solid
+                                                            var(--line);
+                                                        border-radius: 6px;
+                                                        padding: 4px 7px;
+                                                    "
+                                                />
+                                            </td>
+                                            <td>打設日ごと</td>
+                                            <td>
+                                                <span class="src-badge man"
+                                                    >ひな形</span
+                                                >
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>スクリュー杭</b></td>
+                                            <td>打込み精度 / 支持力</td>
+                                            <td>トルク管理 / 引抜試験</td>
+                                            <td>
+                                                <input
+                                                    type="text"
+                                                    value="計画値以上"
+                                                    style="
+                                                        width: 110px;
+                                                        border: 1px solid
+                                                            var(--line);
+                                                        border-radius: 6px;
+                                                        padding: 4px 7px;
+                                                    "
+                                                />
+                                            </td>
+                                            <td>本数に応じ抜取</td>
+                                            <td>
+                                                <span class="src-badge"
+                                                    >図面</span
+                                                >
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ===== 安全衛生管理計画書 ===== -->
+                    <section class="view" id="v-anzen">
+                        <div class="pagehead">
+                            <div>
+                                <h1 class="page">安全衛生管理計画書</h1>
+                                <div class="sub">
+                                    工種のリスクと防災対策を図面から自動反映
+                                </div>
+                            </div>
+                            <button
+                                class="btn accent"
+                                onclick="
+                                    flash(
+                                        '安全衛生管理計画書.pdf を書き出しました',
+                                    )
+                                "
+                            >
+                                ⬇ 書き出し
+                            </button>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-h">
+                                <h3>安全衛生管理方針・目標</h3>
+                            </div>
+                            <div class="panel-b">
+                                <div class="field">
+                                    <label
+                                        >安全衛生方針
+                                        <span class="src-badge man"
+                                            >要編集</span
+                                        ></label
+                                    >
+                                    <textarea>
+本工事は「無事故・無災害」を目標とし、使用機械及び施工方法を十分に検討して施工する。作業者への安全教育・KY活動を徹底し、ヒューマンエラー（近道・省略行動）の排除に努める。</textarea
+                                    >
+                                </div>
+                                <div class="grid3">
+                                    <div class="field">
+                                        <label>重点実施項目①</label
+                                        ><input
+                                            type="text"
+                                            value="重機接触災害の防止（誘導員配置）"
+                                        />
+                                    </div>
+                                    <div class="field">
+                                        <label>重点実施項目②</label
+                                        ><input
+                                            type="text"
+                                            value="墜落・転落防止（法面下作業の管理）"
+                                        />
+                                    </div>
+                                    <div class="field">
+                                        <label>重点実施項目③</label
+                                        ><input
+                                            type="text"
+                                            value="熱中症予防（WBGT管理）"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-h">
+                                <h3>
+                                    作業ごとの想定リスクと対策（図面より自動抽出）
+                                </h3>
+                                <div class="sp"></div>
+                                <span class="src-badge">図面AI</span>
+                            </div>
+                            <div class="panel-b" style="padding: 0">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>作業</th>
+                                            <th>想定される危険</th>
+                                            <th>対策</th>
+                                            <th>重要度</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>スクリュー杭打設</td>
+                                            <td>杭の倒れ・接触</td>
+                                            <td>
+                                                作業手元者は直角方向で構え、誘導者を配置
+                                            </td>
+                                            <td>
+                                                <span class="tag r">高</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>BH床掘</td>
+                                            <td>深掘り・法面崩壊</td>
+                                            <td>
+                                                丁張設置、床付け面は人力整形、合図者配置
+                                            </td>
+                                            <td>
+                                                <span class="tag o">中</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>ダンプ運搬</td>
+                                            <td>一般車両との接触</td>
+                                            <td>
+                                                交通誘導員配置・過積載防止の周知
+                                            </td>
+                                            <td>
+                                                <span class="tag r">高</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>架台組立</td>
+                                            <td>長尺物の接触</td>
+                                            <td>
+                                                誘導者配置、トランシットで歪み確認
+                                            </td>
+                                            <td>
+                                                <span class="tag o">中</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ===== 災害防止協議会資料 ===== -->
+                    <section class="view" id="v-saigai">
+                        <div class="pagehead">
+                            <div>
+                                <h1 class="page">災害防止協議会資料</h1>
+                                <div class="sub">
+                                    元請・協力会社の体制と、当月の安全管理事項をまとめます
+                                </div>
+                            </div>
+                            <button
+                                class="btn accent"
+                                onclick="
+                                    flash(
+                                        '災害防止協議会資料.pdf を書き出しました',
+                                    )
+                                "
+                            >
+                                ⬇ 書き出し
+                            </button>
+                        </div>
+                        <div class="split">
+                            <div class="panel">
+                                <div class="panel-h">
+                                    <h3>施工体系図（協力会社）</h3>
+                                    <div class="sp"></div>
+                                    <span class="src-badge">図面/名簿</span>
+                                </div>
+                                <div class="panel-b" style="padding: 0">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>会社名</th>
+                                                <th>技術者</th>
+                                                <th>内容</th>
+                                                <th>工期</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <b>株式会社 新地建設工業</b>
+                                                    <div class="mini">元請</div>
+                                                </td>
+                                                <td>坂下 豪</td>
+                                                <td>
+                                                    土工・排水工・蓄電池基礎
+                                                </td>
+                                                <td>R8.4〜R8.9</td>
+                                            </tr>
+                                            <tr>
+                                                <td>紙屋企画 株式会社</td>
+                                                <td>紙屋 了誠</td>
+                                                <td>電気工事</td>
+                                                <td>R8.4〜R8.9</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="panel">
+                                <div class="panel-h">
+                                    <h3>当月の協議事項</h3>
+                                </div>
+                                <div class="panel-b">
+                                    <div class="field">
+                                        <label>安全目標</label
+                                        ><input
+                                            type="text"
+                                            value="全工種 無災害達成"
+                                        />
+                                    </div>
+                                    <div class="field">
+                                        <label>重点管理事項</label
+                                        ><textarea style="min-height: 70px">
+梅雨期の法面管理／降雨時の中止基準の徹底／重機と作業員の接触防止。</textarea
+                                        >
+                                    </div>
+                                    <div class="field">
+                                        <label
+                                            >災害対策 常時出動体制
+                                            <span class="src-badge"
+                                                >図面/防災対策</span
+                                            ></label
+                                        ><textarea style="min-height: 70px">
+重機運転手2名・普通作業員3名／バックホウ(0.2m³)2台・3tダンプ1台・2tダンプ1台／土のう袋100・大型土のう10・ブルーシート3・番線5kg。</textarea
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ===== 社員名簿 ===== -->
+                    <section class="view" id="v-staff">
+                        <div class="pagehead">
+                            <div>
+                                <h1 class="page">社員名簿</h1>
+                                <div class="sub">
+                                    現場組織票・施工体系図などへ、ここから氏名・資格を自動反映します
+                                </div>
+                            </div>
+                            <button class="btn primary" onclick="openStaff()">
+                                ＋ 社員を登録
+                            </button>
+                        </div>
+                        <div class="notice">
+                            <span class="i">🔗</span>
+                            <div>
+                                ここで登録した社員・資格は、施工計画書の<b>現場組織票</b>や<b>施工体系図</b>、災害防止協議会資料で選ぶだけで差し込めます。
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-b" style="padding: 0">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>氏名</th>
+                                            <th>役職 / 担当</th>
+                                            <th>保有資格</th>
+                                            <th>状態</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="staffBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ===== 企業情報登録 ===== -->
+                    <section class="view" id="v-company">
+                        <div class="pagehead">
+                            <div>
+                                <h1 class="page">企業情報登録</h1>
+                                <div class="sub">
+                                    自社情報・標準文面を登録し、施工計画書や各管理書類へ自動反映します
+                                </div>
+                            </div>
+                            <button
+                                class="btn accent"
+                                onclick="saveCompanyMaster()"
+                            >
+                                保存
+                            </button>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-b">
+                                <div class="grid2">
+                                    <div class="field">
+                                        <label>会社名</label
+                                        ><input
+                                            id="companyName"
+                                            type="text"
+                                            value="株式会社 新地建設工業"
+                                        />
+                                    </div>
+                                    <div class="field">
+                                        <label>代表者名</label
+                                        ><input
+                                            id="companyRepresentative"
+                                            type="text"
+                                            value="新地 太郎"
+                                        />
+                                    </div>
+                                    <div class="field">
+                                        <label>所在地</label
+                                        ><input
+                                            id="companyAddress"
+                                            type="text"
+                                            value="宮崎県都城市..."
+                                        />
+                                    </div>
+                                    <div class="field">
+                                        <label>TEL</label
+                                        ><input
+                                            id="companyTel"
+                                            type="text"
+                                            value="000-0000-0000"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label>施工計画書 標準文面</label
+                                    ><textarea
+                                        id="companyStandardText"
+                                        style="min-height: 100px"
+                                    >
+当社は安全・品質・工程管理を徹底し、関係法令と発注者要求に基づいて施工します。</textarea
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ===== 発注者情報登録 ===== -->
+                    <section class="view" id="v-orderer">
+                        <div class="pagehead">
+                            <div>
+                                <h1 class="page">発注者情報登録</h1>
+                                <div class="sub">
+                                    民間企業・宮崎県中心の公共発注者を登録し、仕様書/管理基準をアップロードまたは手入力します
+                                </div>
+                            </div>
+                            <button
+                                class="btn accent"
+                                onclick="saveOrdererMaster()"
+                            >
+                                保存
+                            </button>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-h">
+                                <h3>発注者区分・基本情報</h3>
+                            </div>
+                            <div class="panel-b">
+                                <div class="grid2">
+                                    <div class="field">
+                                        <label>発注者区分</label>
+                                        <select id="ordererType">
+                                            <option value="private">
+                                                民間企業
+                                            </option>
+                                            <option value="public_miyazaki">
+                                                公共（宮崎県）
+                                            </option>
+                                            <option value="public_miyakonojo">
+                                                公共（都城市）
+                                            </option>
+                                            <option value="public_other">
+                                                公共（その他）
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label>発注者名</label
+                                        ><input
+                                            id="ordererName"
+                                            type="text"
+                                            value="宮崎県 県土整備部（例）"
+                                        />
+                                    </div>
+                                    <div class="field">
+                                        <label>提出先部署</label
+                                        ><input
+                                            id="ordererDept"
+                                            type="text"
+                                            value="道路保全課（例）"
+                                        />
+                                    </div>
+                                    <div class="field">
+                                        <label>契約番号 / 案件コード</label
+                                        ><input
+                                            id="ordererCode"
+                                            type="text"
+                                            value="任意入力"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-h">
+                                <h3>仕様書・管理基準の登録</h3>
+                                <div class="sp"></div>
+                                <span class="pill"
+                                    >アップロード + 手入力対応</span
+                                >
+                            </div>
+                            <div class="panel-b">
+                                <div class="field">
+                                    <label
+                                        >仕様書・管理基準ファイル（PDF/Excel）</label
+                                    >
+                                    <div
+                                        class="drop"
+                                        style="padding: 20px"
+                                        onclick="openOrdererSpecFilePicker()"
+                                    >
+                                        <div
+                                            class="big"
+                                            style="font-size: 28px"
+                                        >
+                                            📎
+                                        </div>
+                                        <p>
+                                            発注者別の仕様書、特記仕様、管理基準をアップロード
+                                        </p>
+                                        <button
+                                            class="btn ghost sm"
+                                            style="margin-top: 10px"
+                                            type="button"
+                                            onclick="
+                                                openOrdererSpecFilePicker();
+                                                event.stopPropagation();
+                                            "
+                                        >
+                                            ファイルを選択
+                                        </button>
+                                        <input
+                                            id="ordererSpecFileInput"
+                                            type="file"
+                                            accept=".pdf,.xlsx,.xls,.doc,.docx,.txt"
+                                            multiple
+                                            style="display: none"
+                                            onchange="
+                                                uploadOrdererSpecFiles(
+                                                    this.files,
+                                                )
+                                            "
+                                        />
+                                    </div>
+                                    <div
+                                        id="ordererSpecFileList"
+                                        class="mini"
+                                        style="margin-top: 8px"
+                                    ></div>
+                                </div>
+                                <div class="field">
+                                    <label>手入力条件（優先適用）</label>
+                                    <textarea
+                                        id="ordererManualRules"
+                                        style="min-height: 120px"
+                                    >
+例）品質管理基準、段階確認ルール、提出書類様式、工程管理ルールを手入力で追記。</textarea
+                                    >
+                                </div>
+                                <div class="field">
+                                    <label
+                                        >アップロード済み条件ファイル名（メモ）</label
+                                    >
+                                    <input
+                                        id="ordererSpecFiles"
+                                        type="text"
+                                        value="仕様書.pdf, 管理基準.xlsx"
+                                    />
+                                    <div class="hint">
+                                        実ファイル管理の連携前は、ここにファイル名を記録して書類へ反映します。
+                                    </div>
+                                </div>
+                                <div class="notice" style="margin-bottom: 0">
+                                    <span class="i">🔗</span>
+                                    <div>
+                                        登録した発注者条件をもとに、施工計画書・工程管理表・各管理書類を自動作成します。
+                                    </div>
+                                </div>
+                                <input
+                                    type="hidden"
+                                    id="ordererEditId"
+                                    value=""
+                                />
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <div class="panel-h">
+                                <h3>登録済み発注者条件</h3>
+                            </div>
+                            <div class="panel-b" style="padding: 0">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>発注者名</th>
+                                            <th>区分</th>
+                                            <th>提出先部署</th>
+                                            <th>案件コード</th>
+                                            <th>手入力条件</th>
+                                            <th>条件ファイル</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ordererBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- staff modal -->
+        <div class="modal-mask" id="staffModal">
+            <div class="modal">
+                <h3>社員を登録</h3>
+                <div class="mb">
+                    <div class="grid2">
+                        <div class="field">
+                            <label>氏名</label
+                            ><input type="text" placeholder="例）新地 太郎" />
+                        </div>
+                        <div class="field">
+                            <label>フリガナ</label
+                            ><input type="text" placeholder="シンチ タロウ" />
+                        </div>
+                    </div>
+                    <div class="grid2">
+                        <div class="field">
+                            <label>役職 / 担当</label
+                            ><select>
+                                <option>現場代理人</option>
+                                <option>主任技術者</option>
+                                <option>安全管理</option>
+                                <option>作業員</option>
+                                <option>事務・労務</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>社員番号</label
+                            ><input type="text" placeholder="任意" />
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label>保有資格（複数選択可）</label>
+                        <div
+                            style="
+                                border: 1px solid var(--line);
+                                border-radius: 8px;
+                                padding: 10px;
+                            "
+                        >
+                            <label
+                                style="
+                                    display: inline-flex;
+                                    gap: 6px;
+                                    margin: 4px 10px 4px 0;
+                                    font-weight: 400;
+                                    color: var(--txt);
+                                "
+                                ><input
+                                    type="checkbox"
+                                    checked
+                                />車両系建設機械</label
+                            >
+                            <label
+                                style="
+                                    display: inline-flex;
+                                    gap: 6px;
+                                    margin: 4px 10px 4px 0;
+                                    font-weight: 400;
+                                    color: var(--txt);
+                                "
+                                ><input type="checkbox" checked />玉掛け</label
+                            >
+                            <label
+                                style="
+                                    display: inline-flex;
+                                    gap: 6px;
+                                    margin: 4px 10px 4px 0;
+                                    font-weight: 400;
+                                    color: var(--txt);
+                                "
+                                ><input type="checkbox" />職長・安責者</label
+                            >
+                            <label
+                                style="
+                                    display: inline-flex;
+                                    gap: 6px;
+                                    margin: 4px 10px 4px 0;
+                                    font-weight: 400;
+                                    color: var(--txt);
+                                "
+                                ><input
+                                    type="checkbox"
+                                />1級土木施工管理技士</label
+                            >
+                            <label
+                                style="
+                                    display: inline-flex;
+                                    gap: 6px;
+                                    margin: 4px 10px 4px 0;
+                                    font-weight: 400;
+                                    color: var(--txt);
+                                "
+                                ><input
+                                    type="checkbox"
+                                />小型移動式クレーン</label
+                            >
+                        </div>
+                    </div>
+                </div>
+                <div class="mf">
+                    <button class="btn ghost" onclick="closeStaff()">
+                        キャンセル</button
+                    ><button
+                        class="btn primary"
+                        onclick="
+                            closeStaff();
+                            flash('社員を登録しました');
+                        "
+                    >
+                        登録する
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- project delete confirm modal -->
+        <div class="modal-mask" id="deleteProjectModal">
+            <div class="modal">
+                <h3>工事を削除</h3>
+                <div class="mb">
+                    <p style="margin: 0 0 8px; color: var(--txt)">
+                        本当に削除しますか？
+                    </p>
+                    <div class="notice" style="margin: 0">
+                        <span class="i">⚠</span>
+                        <div>
+                            <b id="deleteProjectTargetName">-</b>
+                            を削除すると元に戻せません。
+                        </div>
+                    </div>
+                </div>
+                <div class="mf">
+                    <button
+                        class="btn ghost"
+                        onclick="closeDeleteProjectModal()"
+                    >
+                        いいえ
+                    </button>
+                    <button
+                        class="btn primary"
+                        style="background: #b42318"
+                        onclick="confirmDeleteProject()"
+                    >
+                        はい
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="saveflash" id="saveflash">
+            <span>✓</span><span id="saveflashtxt">保存しました</span>
+        </div>
+
+        <script src="js/app.js"></script>
+    </body>
+</html>
